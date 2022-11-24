@@ -1,0 +1,132 @@
+---
+title: "Stylométrie Tertullien"
+date: "2022-11-23"
+author: "Mathilde Schwoerer" 
+output:
+  html_document: 
+    highlight: pygments
+    toc: yes
+    toc_float:
+      toc_collapsed: yes
+    theme: united
+---
+#J'essaie de composer un script pour situer Tertullien par rapport aux auteurs que les éminents tertullianistes estiment proches de son esthétique littéraire. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+#Étape préparatoire : je définis mon espace de travail. En l'occurrence, mon corpus se forme des oeuvres de Tertullien, de Tacite, d'Apulée et de Sénèque (à l'exception des tragédies de ce dernier). J'utilise les fichiers .xml obtenus à cette adresse : https://scaife.perseus.org/library/. 
+
+```{r}
+setwd("/Users/mathildeschwoerer/Stylométrie")
+```
+
+#Je vérifie que l'ordinateur a trouvé le bon dossier : 
+```{r}
+getwd()
+```
+
+#J'installe le package stylo dont j'aurai besoin pour cette session. 
+```{r}
+if(!require("stylo")){
+  install.packages("stylo")
+  library(stylo)
+}
+if(!require("filesstrings")){
+  install.packages("filesstrings")
+  library(filesstrings)
+}
+```
+#Je récupère dans ma bibliographie personnelle la référence du package stylo avec le nom des développeurs. 
+
+
+Comme tout semble en ordre, je peux commencer mes investigations. 
+
+
+#Je lance stylo
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, results='hide'}
+stylo()
+```
+
+#Le data clustering (aka "je pille sans vergogne le code de mon enseignant !"). 
+
+Comme je veux automatiser la sauvergarde des résultats, parce que c'est fastidieux de le faire à la main et que je risque d'oublier de le faire (errare humanum est), je crée à partir de la ligne 66 un algorithme qui me permettra de les conserver dans des sous-dossiers d'un dossier intitulé "Résultats". Il faut juste que je modifie le nom du sous-répertoire (ligne 66) à chaque fois que je change les paramètres de calcul. 
+
+```{r}
+library(tcltk2)
+.Tcl("font delete myDefaultFont")
+```
+
+
+```{r}
+stylo(gui=TRUE, corpus.dir = "corpus",
+      corpus.format = "xml", corpus.lang = "Latin",
+      analyzed.features = "w", mfw.min = 100, mfw.max = 1000, mfw.incr=100,
+      analysis.type = "CA", distance.measure = "manhattan",
+      pca.visual.flavour = "classic",
+      graph = ".jpeg",
+      save.analysed.features=TRUE,save.analysed.freqs=TRUE,save.distance.tables=TRUE)
+
+Nom_sous_répertoire="Test"
+A<-list.files()
+for (fichier in A){
+  if (endsWith(fichier, ".txt")){
+    file.move(fichier,paste("./Résultats/",Nom_sous_répertoire),overwrite = TRUE)
+  }
+  if (endsWith(fichier, ".jpg")){
+    file.move(fichier,paste("./Résultats/",Nom_sous_répertoire),overwrite = TRUE)
+  }
+  if (endsWith(fichier, ".csv")){
+    file.move(fichier,paste("./Résultats/",Nom_sous_répertoire),overwrite = TRUE)
+  }
+}
+```
+#J'aimerais changer le culling pour voir apparaître les mots commnuns à tous les textes, parce que, chez Tertullien, le vocabulaire spécifiquement chrétien arrive parmi les premiers MFW (deus, christus, etc.). 
+#D'après la documentation que j'ai consultée sur stylo (https://cran.r-project.org/web/packages/stylo/stylo.pdf, p. 47-48), il faut d'abord que je mette mes MFW dans une matrice qui contient les fréquences de chaque mot : "the table should be oriented to contain samples in rows, variables in columns, and variables’ names should be accessible via colnames" (ibidem). 
+#Je voulais utiliser le fichier "table with frequencies.txt", mais ça ne fonctionne pas :( 
+
+
+```{r, echo=TRUE, results='hide', message=FALSE, warning=FALSE}
+stylo(gui=TRUE, corpus.dir = "corpus",
+      corpus.format = "xml", corpus.lang = "Latin",
+      analyzed.features = "w", mfw.min = 100, mfw.max = 1000, mfw.incr=100,
+      analysis.type = "CA", distance.measure = "manhattan",
+      graph = ".jpeg",
+      perform.culling(table_with_frequencies.txt, culling.level = 50),
+      pca.visual.flavour = "classic")
+
+Nom_sous_répertoire="Test 2"
+A<-list.files()
+for (fichier in A){
+  if (endsWith(fichier, ".txt")){
+    file.move(fichier,paste("./Résultats/",Nom_sous_répertoire),overwrite = TRUE)
+  }
+  if (endsWith(fichier, ".jpg")){
+    file.move(fichier,paste("./Résultats/",Nom_sous_répertoire),overwrite = TRUE)
+  }
+  if (endsWith(fichier, ".csv")){
+    file.move(fichier,paste("./Résultats/",Nom_sous_répertoire),overwrite = TRUE)
+  }
+}
+```
+
+
+```
+
+
+
+
+
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
